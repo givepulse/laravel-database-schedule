@@ -108,7 +108,9 @@ class Schedule
             );
 
             $event->after(function () use ($event) {
-                unlink($event->output);
+                if (file_exists($event->output)) {
+                    unlink($event->output);
+                }
             });
 
             unset($event);
@@ -122,7 +124,7 @@ class Schedule
         if ($task->log_filename) {
             $logChannel = Log::build([
                 'driver' => 'single',
-                'path' => storage_path('logs/' . $task->log_filename . '.log'),
+                'path'   => storage_path('logs/'.$task->log_filename.'.log'),
             ]);
             Log::stack([$logChannel])->$type(file_get_contents($event->output));
         }
@@ -133,9 +135,9 @@ class Schedule
         $task->histories()->create(
             [
                 'command' => $command,
-                'params' => $task->getArguments(),
+                'params'  => $task->getArguments(),
                 'options' => $task->getOptions(),
-                'output' => file_get_contents($event->output)
+                'output'  => file_get_contents($event->output),
             ]
         );
     }
